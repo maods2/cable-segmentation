@@ -8,4 +8,5 @@ scikit-learn
 albumentations
 segmentation-models-pytorch
 mmengine
+patchify
 
