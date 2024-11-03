@@ -1,0 +1,11 @@
+opencv-python
+gdown
+scipy 
+matplotlib 
+tqdm 
+pandas
+scikit-learn
+albumentations
+segmentation-models-pytorch
+mmengine
+
