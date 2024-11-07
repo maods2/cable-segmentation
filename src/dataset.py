@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from typing import List, Tuple
 from pathlib import Path
+from tqdm import tqdm
 
 
 # https://stackoverflow.com/questions/78104467/how-to-load-a-batch-of-images-of-and-split-them-into-patches-on-the-fly-with-pyt
@@ -23,22 +24,37 @@ def make_paches(
     patches = list(patches)
     return patches
 
-def collate_fn(batch : List[Tuple[torch.Tensor, int]]) -> Tuple[torch.Tensor, torch.Tensor]:
-    
+def collate_fn(batch: List[Tuple[torch.Tensor, int]]) -> Tuple[torch.Tensor, torch.Tensor]:
     new_x = []
     new_mask = []
     
-    for b in batch:
-        
-        patches = make_paches(b['image'], 224, 224)
+
+    valid_indices = []
+
+
+    for i, b in enumerate(batch):
+
+        patches = make_paches(b['image'], 256, 256)
+        mask_patches = make_paches(b['mask'], 256, 256)
+
+
+        for mask_patch in mask_patches:
+            if mask_patch.max() != 0:
+                valid_indices.append(i)
+
+        # Armazenar os patches
         new_x.extend(patches)
-        mask_patches = make_paches(b['mask'], 224, 224)
         new_mask.extend(mask_patches)
 
-    new_x = torch.stack(new_x)
-    new_mask = torch.stack(new_mask)
     
-    return {"image": new_x, "mask": new_mask}
+    filtered_images = [new_x[i] for i in valid_indices]
+    filtered_masks = [new_mask[i] for i in valid_indices]
+
+ 
+    filtered_images = torch.stack(filtered_images)
+    filtered_masks = torch.stack(filtered_masks)
+    
+    return {"image": filtered_images, "mask": filtered_masks}
 
 class ImageMaskDataset(Dataset):
     def __init__(self, image_dir, transform=None):
@@ -73,11 +89,20 @@ class ImageMaskDataset(Dataset):
         if self.transform:
             augmented = self.transform(image=image, mask=mask)
             image = augmented['image']
-            mask = augmented['mask']
-
-        return {"image": torch.tensor(image, dtype=torch.float32).permute(2, 0, 1) / 255.0,  # Normalize and change order to (C, H, W)
-                "mask": torch.tensor(mask, dtype=torch.float32).unsqueeze(0) / 255.0}  # Adds channel dimension
-
+            mask = augmented['mask'].unsqueeze(0)
+            mask = mask / 255.0
+            
+            # # print(f'Augmented image shape: {augmented["image"].shape}')
+            # print(f'Augmented mask shape: {augmented["mask"].shape}')
+            # # print(mask.unique())
+            # mask_np = np.squeeze(mask.numpy())
+            # import matplotlib.pyplot as plt
+            # print(f'Augmented numpy shape: {mask_np.shape}')
+            # plt.imsave('mask_binaria.png', mask_np, cmap='gray', format='png')
+            # raise
+            
+        return {"image": image,  # Normalize and change order to (C, H, W)
+                "mask": mask  } # Adds channel dimension
 
 
 if __name__ == '__main__':
@@ -85,12 +110,15 @@ if __name__ == '__main__':
     path = './data_original_size'
     dataset = ImageMaskDataset(image_dir=path)
     dataloader = DataLoader(dataset=dataset, batch_size=32, shuffle=True, collate_fn=collate_fn)
-
-    for batch in dataloader:
-        images_patches = batch['image']
-        masks_patches = batch['mask']
+    sub_batch_size=32
+    
+    progress_bar = tqdm(dataloader, desc=f'Epoch {0+1}/{10}', leave=True)
+    for batch in progress_bar:
+        images_patches = batch['image'].to('cuda')
+        masks_patches = batch['mask'].to('cuda')
         
-        num_patches = patches.size(0)
+        num_patches = images_patches.size(0)
         for i in range(0, num_patches, sub_batch_size):
             # Selecionar o sub-batch
-            sub_batch = patches[i:i + sub_batch_size]
+            img_sub_batch = images_patches[i:i + sub_batch_size]
+            mask_sub_batch = masks_patches[i:i + sub_batch_size]
