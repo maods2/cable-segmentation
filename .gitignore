@@ -7,6 +7,8 @@ __pycache__/
 *.zip
 *.jpg
 *.json
+lightning_logs
+checkpoints
 
 # C extensions
 *.so
