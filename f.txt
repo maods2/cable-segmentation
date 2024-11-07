@@ -1,7 +1,12 @@
 addict==2.4.0
+aiohappyeyeballs==2.4.3
+aiohttp==3.10.10
+aiosignal==1.3.1
 albucore==0.0.17
 albumentations==1.4.18
 annotated-types==0.7.0
+async-timeout==4.0.3
+attrs==24.2.0
 backcall @ file:///home/ktietz/src/ci/backcall_1611930011877/work
 beautifulsoup4 @ file:///tmp/build/80754af9/beautifulsoup4_1631874778482/work
 brotlipy==0.7.0
@@ -13,9 +18,16 @@ conda==4.11.0
 conda-build==3.21.7
 conda-content-trust @ file:///tmp/build/80754af9/conda-content-trust_1617045594566/work
 conda-package-handling @ file:///tmp/build/80754af9/conda-package-handling_1618262148928/work
-conort==0.2.0
+contourpy==1.1.1
+cryptography @ file:///tmp/build/80754af9/cryptography_1639400846433/work
+cycler==0.12.1
+decorator @ file:///opt/conda/conda-bld/decorator_1643638310831/work
+dnspython==2.2.1
+efficientnet-pytorch==0.7.1
+eval_type_backport==0.2.0
 filelock @ file:///opt/conda/conda-bld/filelock_1642510437405/work
 fonttools==4.54.1
+frozenlist==1.5.0
 fsspec==2024.10.0
 gdown==5.2.0
 glob2 @ file:///home/linux1/recipes/ci/glob2_1610991677669/work
@@ -31,6 +43,7 @@ joblib==1.4.2
 kiwisolver==1.4.7
 lazy_loader==0.4
 libarchive-c @ file:///tmp/build/80754af9/python-libarchive-c_1617780486945/work
+lightning-utilities==0.11.8
 markdown-it-py==3.0.0
 MarkupSafe @ file:///tmp/build/80754af9/markupsafe_1621528148836/work
 matplotlib==3.7.5
@@ -40,14 +53,29 @@ mkl-fft==1.3.1
 mkl-random @ file:///tmp/build/80754af9/mkl_random_1626186064646/work
 mkl-service==2.4.0
 mmengine==0.10.5
+mpmath==1.3.0
+multidict==6.1.0
 munch==4.0.0
 networkx==3.1
 numpy==1.24.4
+nvidia-cublas-cu12==12.1.3.1
+nvidia-cuda-cupti-cu12==12.1.105
+nvidia-cuda-nvrtc-cu12==12.1.105
+nvidia-cuda-runtime-cu12==12.1.105
+nvidia-cudnn-cu12==9.1.0.70
+nvidia-cufft-cu12==11.0.2.54
+nvidia-curand-cu12==10.3.2.106
+nvidia-cusolver-cu12==11.4.5.107
+nvidia-cusparse-cu12==12.1.0.106
+nvidia-nccl-cu12==2.20.5
+nvidia-nvjitlink-cu12==12.6.77
+nvidia-nvtx-cu12==12.1.105
 opencv-python==4.10.0.84
 opencv-python-headless==4.10.0.84
 packaging==24.1
 pandas==2.0.3
 parso @ file:///opt/conda/conda-bld/parso_1641458642106/work
+patchify==0.2.3
 pexpect @ file:///tmp/build/80754af9/pexpect_1605563209008/work
 pickleshare @ file:///tmp/build/80754af9/pickleshare_1606932040724/work
 Pillow==9.0.1
@@ -55,6 +83,7 @@ pkginfo @ file:///tmp/build/80754af9/pkginfo_1643162084911/work
 platformdirs==4.3.6
 pretrainedmodels==0.7.4
 prompt-toolkit @ file:///tmp/build/80754af9/prompt-toolkit_1633440160888/work
+propcache==0.2.0
 psutil @ file:///tmp/build/80754af9/psutil_1612298023621/work
 ptyprocess @ file:///tmp/build/80754af9/ptyprocess_1609355006118/work/dist/ptyprocess-0.7.0-py2.py3-none-any.whl
 pycosat==0.6.3
@@ -65,14 +94,9 @@ Pygments==2.18.0
 pyOpenSSL @ file:///tmp/build/80754af9/pyopenssl_1635333100036/work
 pyparsing==3.1.4
 PySocks @ file:///tmp/build/80754af9/pysocks_1605305779399/work
-python-dateutil=tourpy==1.1.1
-cryptography @ file:///tmp/build/80754af9/cryptography_1639400846433/work
-cycler==0.12.1
-decorator @ file:///opt/conda/conda-bld/decorator_1643638310831/work
-dnspython==2.2.1
-efficientnet-pytorch==0.7.1
-eval_type_backp=2.9.0.post0
+python-dateutil==2.9.0.post0
 python-etcd==0.4.5
+pytorch-lightning==2.4.0
 pytz==2021.3
 PyWavelets==1.4.1
 PyYAML==6.0
@@ -86,20 +110,24 @@ scipy==1.10.1
 segmentation-models-pytorch==0.3.3
 six @ file:///tmp/build/80754af9/six_1623709665295/work
 soupsieve @ file:///tmp/build/80754af9/soupsieve_1636706018808/work
+sympy==1.13.3
 termcolor==2.4.0
 threadpoolctl==3.5.0
 tifffile==2023.7.10
 timm==0.9.2
 tomli==2.0.2
-torch==1.11.0
+torch==2.4.1
 torchelastic==0.2.2
+torchmetrics==1.5.1
 torchtext==0.12.0
 torchvision==0.12.0
 tqdm @ file:///tmp/build/80754af9/tqdm_1635330843403/work
 traitlets @ file:///tmp/build/80754af9/traitlets_1636710298902/work
+triton==3.0.0
 typing_extensions==4.12.2
 tzdata==2024.2
 urllib3==1.26.7
 wcwidth @ file:///Users/ktietz/demo/mc3/conda-bld/wcwidth_1629357192024/work
 yapf==0.40.2
+yarl==1.15.2
 zipp==3.20.2

@@ -9,4 +9,5 @@ albumentations
 segmentation-models-pytorch
 mmengine
 patchify
+pytorch-lightning
 
