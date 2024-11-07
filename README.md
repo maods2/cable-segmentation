@@ -43,3 +43,8 @@ chmod +x run_gpu_container.sh
 ```
 make download-dataset
 ```
+
+## Conda save env command
+```
+conda env export --no-builds > environment.yml
+```
