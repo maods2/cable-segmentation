@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 from pathlib import Path
 import torch
@@ -5,7 +6,8 @@ import torch
 
 def save_model(model):
     Path(f'./checkpoints/').mkdir(exist_ok=True)
-    model_path = f"./checkpoints/model.pth"
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    model_path = f"./checkpoints/cable_seg_model_{timestamp}.pth"
     torch.save(model.state_dict(), model_path)
     
 def load_checkpoint(path, model):

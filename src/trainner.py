@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 
 import torch
@@ -10,6 +11,7 @@ from tqdm import tqdm
 from dataset import ImageMaskDataset
 import gc
 import albumentations as A
+import numpy as np
 
 
 
@@ -171,6 +173,17 @@ class WireModel(pl.LightningModule):
         }
         return
     
+    def save_metrics(self):
+        metrics = {}
+        metrics['val'] = self.validation_step_outputs
+        metrics['test'] = self.test_step_outputs
+        metrics['train'] = self.training_step_outputs
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        model_path = f"./checkpoints/model_metrics_{timestamp}.npz"
+        np.savez(model_path, **metrics)
+
+        
+        
 if __name__ == "__main__":
     
     # init train, val, test sets
