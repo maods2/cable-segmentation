@@ -29,6 +29,9 @@ def main():
     # Start training if the `--train` flag is set
     if args.train:
         train_loader, val_loader, test_loader = get_dataloaders(config, dataset)
+        print(f"train size: {len(train_loader.dataset)}, num batches: {len(train_loader)}")
+        print(f"val size: {len(val_loader.dataset)}")
+        print(f"test size: {len(test_loader.dataset)}")
         train_model(config, train_loader, val_loader, test_loader)
     else:
         print("Train flag not set. Use --train to start training.")
