@@ -6,6 +6,7 @@ __pycache__/
 # Dataset
 *.zip
 *.jpg
+*.png
 *.json
 lightning_logs
 checkpoints
