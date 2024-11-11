@@ -52,4 +52,5 @@ conda env export --no-builds > environment.yml
 ## Run training
 ```
 make train CONFIG_FILE=default.yaml
+make train CONFIG_FILE=test.yaml
 ```
