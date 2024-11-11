@@ -18,7 +18,16 @@ from utils import plot_loss_curve
 
 
 class WireModel(pl.LightningModule):
-    def __init__(self, arch, encoder_name, in_channels, out_classes, tmax, pipeline_name, **kwargs):
+    def __init__(
+        self,
+        arch,
+        encoder_name,
+        in_channels,
+        out_classes,
+        tmax,
+        pipeline_name,
+        **kwargs,
+    ):
         super().__init__()
         self.t_max = tmax
         self.pipeline_name = pipeline_name
@@ -30,10 +39,10 @@ class WireModel(pl.LightningModule):
         #     **kwargs,
         # )
         self.model = smp.Unet(
-            encoder_name="resnet34",        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            encoder_weights="imagenet",     # use `imagenet` pre-trained weights for encoder initialization
-            in_channels=in_channels,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
-            classes=out_classes,                      # model output channels (number of classes in your dataset)
+            encoder_name="resnet34",  # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
+            encoder_weights="imagenet",  # use `imagenet` pre-trained weights for encoder initialization
+            in_channels=in_channels,  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
+            classes=out_classes,  # model output channels (number of classes in your dataset)
         )
 
         # preprocessing parameteres for image
@@ -48,15 +57,15 @@ class WireModel(pl.LightningModule):
         self.training_step_outputs = []
         self.validation_step_outputs = []
         self.test_step_outputs = []
-        
+
         self.metrics = defaultdict(list)
-    
+
     def save_metrics(self):
 
         # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         # model_path = f"./checkpoints/model_metrics_{timestamp}.npz"
         # np.savez(model_path, **self.metrics)
-        plot_loss_curve(self.metrics, f'{self.pipeline_name}_loss_curve.png')
+        plot_loss_curve(self.metrics, f"{self.pipeline_name}_loss_curve.png")
 
     def forward(self, image):
         # normalize image here
@@ -77,13 +86,17 @@ class WireModel(pl.LightningModule):
         # following shapes of features in encoder and decoder: 84, 42, 21, 10, 5 -> 5, 10, 20, 40, 80
         # and we will get an error trying to concat these features
         h, w = image.shape[2:]
-        assert h % 32 == 0 and w % 32 == 0, f"image size should be divisible by 32, got {h}x{w}"
+        assert (
+            h % 32 == 0 and w % 32 == 0
+        ), f"image size should be divisible by 32, got {h}x{w}"
 
         mask = batch["mask"]
         assert mask.ndim == 4
 
         # Check that mask values in between 0 and 1, NOT 0 and 255 for binary segmentation
-        assert mask.max() <= 1.0 and mask.min() >= 0, f"mask values should be in between 0 and 1, got max={mask.max()} min={ mask.min()}"
+        assert (
+            mask.max() <= 1.0 and mask.min() >= 0
+        ), f"mask values should be in between 0 and 1, got max={mask.max()} min={ mask.min()}"
 
         logits_mask = self.forward(image)
 
@@ -118,8 +131,7 @@ class WireModel(pl.LightningModule):
         losses = [x["_loss"] for x in outputs]
         loss = sum(losses) / len(losses)
         self.metrics[stage].append(loss)
-        
-        
+
         # aggregate step metics
         tp = torch.cat([x["tp"] for x in outputs])
         fp = torch.cat([x["fp"] for x in outputs])
@@ -147,7 +159,7 @@ class WireModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         train_loss_info = self.shared_step(batch, "train")
-        
+
         # append the metics of each step to the
         self.training_step_outputs.append(train_loss_info)
         return train_loss_info
@@ -160,7 +172,7 @@ class WireModel(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         valid_loss_info = self.shared_step(batch, "valid")
-        
+
         self.validation_step_outputs.append(valid_loss_info)
         return valid_loss_info
 
@@ -171,8 +183,7 @@ class WireModel(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         test_loss_info = self.shared_step(batch, "test")
-        
-        
+
         self.test_step_outputs.append(test_loss_info)
         return test_loss_info
 
@@ -184,7 +195,9 @@ class WireModel(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=2e-4)
-        scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.t_max, eta_min=1e-5)
+        scheduler = lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=self.t_max, eta_min=1e-5
+        )
         return {
             "optimizer": optimizer,
             "lr_scheduler": {
@@ -194,48 +207,44 @@ class WireModel(pl.LightningModule):
             },
         }
         return
-    
 
 
-        
-        
 if __name__ == "__main__":
-    
+
     # init train, val, test sets
-    path = './data_original_size'
-    transforms = A.Compose([
-        A.PadIfNeeded(min_height=250, min_width=250),
-        A.pytorch.transforms.ToTensorV2(),
-    ])
+    path = "./data_original_size"
+    transforms = A.Compose(
+        [
+            A.PadIfNeeded(min_height=250, min_width=250),
+            A.pytorch.transforms.ToTensorV2(),
+        ]
+    )
 
     dataset = ImageMaskDataset(image_dir=path, transform=transforms)
-    
-    
-    train_size = int(0.8 * len(dataset))  
-    test_size = len(dataset) - train_size  
+
+    train_size = int(0.8 * len(dataset))
+    test_size = len(dataset) - train_size
     print(f"Train size: {train_size}")
     print(f"Test size: {test_size}")
 
     # Divida o dataset entre treino e teste
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
-    # Configure os DataLoaders 
+    # Configure os DataLoaders
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
-
 
     n_cpu = os.cpu_count()
 
     EPOCHS = 10
     T_MAX = EPOCHS * len(train_loader)
     OUT_CLASSES = 1
-    
-    progress_bar = tqdm(train_loader, desc=f'Epoch {0+1}/{10}', leave=True)
+
+    progress_bar = tqdm(train_loader, desc=f"Epoch {0+1}/{10}", leave=True)
     for batch in progress_bar:
-        images_patches = batch['image']
-        masks_patches = batch['mask']
+        images_patches = batch["image"]
+        masks_patches = batch["mask"]
         del batch
         del images_patches
         del masks_patches
         gc.collect()
-    

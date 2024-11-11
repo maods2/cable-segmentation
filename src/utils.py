@@ -70,5 +70,3 @@ def plot_loss_curve(data, filename):
     # Saving the plot to the file
     plt.savefig(filename)
     plt.close()
-
-
