@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 
 # https://stackoverflow.com/questions/78104467/how-to-load-a-batch-of-images-of-and-split-them-into-patches-on-the-fly-with-pyt
-def make_paches(
+def make_patches(
     img : torch.Tensor,
     patch_width : int,
     patch_height : int
@@ -25,35 +25,32 @@ def make_paches(
     return patches
 
 def collate_fn(batch: List[Tuple[torch.Tensor, int]]) -> Tuple[torch.Tensor, torch.Tensor]:
-    new_x = []
-    new_mask = []
-    
+    new_x = []        # List to store image patches
+    new_mask = []     # List to store mask patches
+    valid_images = [] # List to store valid image patches
+    valid_masks = []  # List to store valid mask patches
 
-    valid_indices = []
-
-
+    # Iterating over each item in the batch
     for i, b in enumerate(batch):
-
-        patches = make_paches(b['image'], 256, 256)
-        mask_patches = make_paches(b['mask'], 256, 256)
+        image, mask = b['image'], b['mask']
 
 
-        for mask_patch in mask_patches:
+        # Assuming `make_patches` splits the image and mask into patches
+        patches = make_patches(image, 256, 256)
+        mask_patches = make_patches(mask, 256, 256)
+
+        # Iterating over the mask patches
+        for j, mask_patch in enumerate(mask_patches):
+            # Check if the mask patch contains any non-zero value
             if mask_patch.max() != 0:
-                valid_indices.append(i)
+                valid_images.append(patches[j])  # Add valid image patch
+                valid_masks.append(mask_patch)   # Add valid mask patch
 
-        # Armazenar os patches
-        new_x.extend(patches)
-        new_mask.extend(mask_patches)
+    # Stack the valid patches into tensors
+    filtered_images = torch.stack(valid_images)
+    filtered_masks = torch.stack(valid_masks)
 
-    
-    filtered_images = [new_x[i] for i in valid_indices]
-    filtered_masks = [new_mask[i] for i in valid_indices]
-
- 
-    filtered_images = torch.stack(filtered_images)
-    filtered_masks = torch.stack(filtered_masks)
-    
+    # Return the dictionary with valid image and mask patches
     return {"image": filtered_images, "mask": filtered_masks}
 
 class ImageMaskDataset(Dataset):

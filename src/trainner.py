@@ -12,7 +12,7 @@ from dataset import ImageMaskDataset
 import gc
 import albumentations as A
 import numpy as np
-
+from collections import defaultdict
 
 
 class WireModel(pl.LightningModule):
@@ -45,6 +45,14 @@ class WireModel(pl.LightningModule):
         self.training_step_outputs = []
         self.validation_step_outputs = []
         self.test_step_outputs = []
+        
+        self.metrics = defaultdict(list)
+    
+    def save_metrics(self):
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        model_path = f"./checkpoints/model_metrics_{timestamp}.npz"
+        np.savez(model_path, **self.metrics)
 
     def forward(self, image):
         # normalize image here
@@ -99,9 +107,15 @@ class WireModel(pl.LightningModule):
             "fp": fp,
             "fn": fn,
             "tn": tn,
+            "_loss": loss.cpu().detach().numpy(),
         }
 
     def shared_epoch_end(self, outputs, stage):
+        losses = [x["_loss"] for x in outputs]
+        loss = sum(losses) / len(losses)
+        self.metrics[stage].append(loss)
+        
+        
         # aggregate step metics
         tp = torch.cat([x["tp"] for x in outputs])
         fp = torch.cat([x["fp"] for x in outputs])
@@ -129,6 +143,7 @@ class WireModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         train_loss_info = self.shared_step(batch, "train")
+        
         # append the metics of each step to the
         self.training_step_outputs.append(train_loss_info)
         return train_loss_info
@@ -141,6 +156,7 @@ class WireModel(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         valid_loss_info = self.shared_step(batch, "valid")
+        
         self.validation_step_outputs.append(valid_loss_info)
         return valid_loss_info
 
@@ -151,6 +167,8 @@ class WireModel(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         test_loss_info = self.shared_step(batch, "test")
+        
+        
         self.test_step_outputs.append(test_loss_info)
         return test_loss_info
 
@@ -173,14 +191,7 @@ class WireModel(pl.LightningModule):
         }
         return
     
-    def save_metrics(self):
-        metrics = {}
-        metrics['val'] = self.validation_step_outputs
-        metrics['test'] = self.test_step_outputs
-        metrics['train'] = self.training_step_outputs
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        model_path = f"./checkpoints/model_metrics_{timestamp}.npz"
-        np.savez(model_path, **metrics)
+
 
         
         
@@ -224,10 +235,3 @@ if __name__ == "__main__":
         del masks_patches
         gc.collect()
     
-    # trainer = pl.Trainer(max_epochs=EPOCHS, log_every_n_steps=1)
-
-    # trainer.fit(
-    #     model,
-    #     train_dataloaders=train_dataloader,
-    #     val_dataloaders=valid_dataloader,
-    # )
