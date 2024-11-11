@@ -3,7 +3,7 @@ resize_x: 256
 resize_y: 256
 learning_rate: 0.1
 train_set_split: 0.8
-epoch: 1
+epoch: 100
 encoder_type: "resnet34"
 transforms_type: "full-image-resize"
 use_patches: false
