@@ -1,6 +1,7 @@
 import argparse
 from dataset import ImageMaskDataset
-from config import build_transforms, load_config, get_dataloaders, train_model
+from config import build_transforms, load_config, get_dataloaders
+from train import train_model
 
 
 def main():
