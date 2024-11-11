@@ -8,6 +8,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 
+
 # https://stackoverflow.com/questions/78104467/how-to-load-a-batch-of-images-of-and-split-them-into-patches-on-the-fly-with-pyt
 def make_patches(
     img : torch.Tensor,
@@ -25,8 +26,6 @@ def make_patches(
     return patches
 
 def collate_fn(batch: List[Tuple[torch.Tensor, int]]) -> Tuple[torch.Tensor, torch.Tensor]:
-    new_x = []        # List to store image patches
-    new_mask = []     # List to store mask patches
     valid_images = [] # List to store valid image patches
     valid_masks = []  # List to store valid mask patches
 

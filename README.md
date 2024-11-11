@@ -53,4 +53,6 @@ conda env export --no-builds > environment.yml
 ```
 make train CONFIG_FILE=default.yaml
 make train CONFIG_FILE=test.yaml
+make train CONFIG_FILE=dataset_patches.yaml
+make train CONFIG_FILE=dataset_resize.yaml
 ```

@@ -14,11 +14,14 @@ import albumentations as A
 import numpy as np
 from collections import defaultdict
 
+from utils import plot_loss_curve
+
 
 class WireModel(pl.LightningModule):
-    def __init__(self, arch, encoder_name, in_channels, out_classes, tmax, **kwargs):
+    def __init__(self, arch, encoder_name, in_channels, out_classes, tmax, pipeline_name, **kwargs):
         super().__init__()
         self.t_max = tmax
+        self.pipeline_name = pipeline_name
         # self.model = smp.create_model(
         #     arch,
         #     encoder_name=encoder_name,
@@ -50,9 +53,10 @@ class WireModel(pl.LightningModule):
     
     def save_metrics(self):
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        model_path = f"./checkpoints/model_metrics_{timestamp}.npz"
-        np.savez(model_path, **self.metrics)
+        # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # model_path = f"./checkpoints/model_metrics_{timestamp}.npz"
+        # np.savez(model_path, **self.metrics)
+        plot_loss_curve(self.metrics, f'{self.pipeline_name}_loss_curve.png')
 
     def forward(self, image):
         # normalize image here

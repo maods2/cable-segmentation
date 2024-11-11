@@ -48,7 +48,7 @@ def plot_loss_curve(data, filename):
     """
     # Extracting the data
     train_loss = data["train"]
-    val_loss = data["val"]
+    val_loss = data["valid"]
 
     # Generating the number of epochs (assuming both arrays have the same length)
     epochs_t = np.arange(1, len(train_loss) + 1)
@@ -70,3 +70,5 @@ def plot_loss_curve(data, filename):
     # Saving the plot to the file
     plt.savefig(filename)
     plt.close()
+
+

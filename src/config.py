@@ -27,6 +27,7 @@ class Config:
     in_channels: int
     out_classes: int
     data_path: str
+    pipeline_name:str
 
 
 def split_datasets(config: Config, dataset):
@@ -79,6 +80,7 @@ def train_model(config: Config, train_loader, val_loader, test_loader):
         in_channels=config.in_channels,
         out_classes=config.out_classes,
         tmax=config.epoch * len(train_loader),
+        pipeline_name=config.pipeline_name
     )
     trainer = pl.Trainer(max_epochs=config.epoch, log_every_n_steps=1)
     trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=val_loader)

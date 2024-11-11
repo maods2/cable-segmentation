@@ -11,3 +11,4 @@ model_name: "Unet"
 in_channels: 3
 out_classes: 1
 data_path: './data_original_size'
+pipeline_name: 'default'

@@ -1,9 +1,9 @@
-batch_size: 5
+batch_size: 1
 resize_x: 256
 resize_y: 256
 learning_rate: 0.1
 train_set_split: 0.8
-epoch: 100
+epoch: 2
 encoder_type: "resnet34"
 transforms_type: "patches"
 use_patches: true
@@ -11,3 +11,4 @@ model_name: "Unet"
 in_channels: 3
 out_classes: 1
 data_path: './data_original_size'
+pipeline_name: 'patches'
