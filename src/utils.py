@@ -19,7 +19,7 @@ def load_checkpoint(path, model):
     model.load_state_dict(torch.load(path, weights_only=True))
 
 
-def merge_image(image, mask):
+def merge_image(image, mask, output_dir):
     # Resize mask if its shape doesn't match the original image dimensions
     if mask.shape != image.shape[:2]:
         mask = cv2.resize(mask, (image.shape[1], image.shape[0]))
@@ -34,7 +34,8 @@ def merge_image(image, mask):
 
     # Convert the image from BGR to RGB
     result = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
-    output_path = "predicted_mask_merged.png"
+    sufix = "_predicted_mask_merged.jpg"
+    output_path = output_dir.replace(".jpg", sufix).replace(".png", sufix)
     cv2.imwrite(output_path, result)
 
 
