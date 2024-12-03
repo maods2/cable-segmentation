@@ -11,5 +11,8 @@ train:
 	@echo "Running Python script with configuration file $(CONFIG_FILE)"
 	python3 src/main.py --train --config "./configs/$(CONFIG_FILE)"
 
+train-sam:
+	python3 src/sam_model.py --num_epochs 1 --batch_size 2 
+
 inference:
 	python3 src/inference.py 

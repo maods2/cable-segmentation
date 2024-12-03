@@ -6,7 +6,8 @@ from torch.utils.data import Dataset, DataLoader
 from typing import List, Tuple
 from pathlib import Path
 from tqdm import tqdm
-
+import albumentations as A
+from albumentations.pytorch.transforms import ToTensorV2
 
 # https://stackoverflow.com/questions/78104467/how-to-load-a-batch-of-images-of-and-split-them-into-patches-on-the-fly-with-pyt
 def make_patches(
@@ -108,6 +109,66 @@ class ImageMaskDataset(Dataset):
             "image": image,  # Normalize and change order to (C, H, W)
             "mask": mask,
         }  # Adds channel dimension
+
+
+
+class SAMDataset(Dataset):
+    def __init__(self, image_dir, processor=None):
+        """
+        Builds the dataset to load images and masks.
+
+        Args:
+            image_dir (str): Directory containing the images.
+            transform (callable, optional): Transformation function to be applied to images and masks.
+        """
+        self.image_dir = image_dir
+        self.transform = A.Compose(
+            [
+                A.Resize(256, 256),
+                # A.Resize(1024, 1024),
+                ToTensorV2(),
+                A.Lambda(image=lambda x, **kwargs: x.float()),
+            ]
+        )
+        self.images = [
+            Path(f).name
+            for f in Path(image_dir).glob("*.jpg")
+            if "mask" not in Path(f).name
+        ]
+
+    def __len__(self):
+        """Returns the number of samples in the dataset."""
+        return len(self.images)
+
+    def __getitem__(self, idx):
+        """Loads an image and its corresponding mask."""
+        img_path = os.path.join(self.image_dir, self.images[idx])
+        mask_path = os.path.join(
+            self.image_dir, f'{self.images[idx].split(".")[0]}_mask.jpg'
+        )
+
+        # Load the image and the mask
+        image = cv2.imread(img_path, cv2.IMREAD_COLOR)
+        mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+
+        # Convert from BGR to RGB
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # Apply transformations if provided
+        
+        augmented = self.transform(image=image, mask=mask)
+        image = augmented["image"]
+        mask = augmented["mask"].unsqueeze(0)
+        mask = mask / 255.0
+
+        # inputs = self.processor(image, input_boxes=[[prompt]], return_tensors="pt")
+
+
+        return {
+            "image": image,  # Normalize and change order to (C, H, W)
+            "mask": mask,
+            "file":self.images[idx]
+        } 
 
 
 if __name__ == "__main__":

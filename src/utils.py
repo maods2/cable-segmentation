@@ -7,10 +7,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def save_model(model):
-    Path(f"./checkpoints/").mkdir(exist_ok=True)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    model_path = f"./checkpoints/cable_seg_model_{timestamp}.pth"
+def save_model(model, model_path=None):
+    
+    if not model_path:
+        Path(f"./checkpoints/").mkdir(exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        model_path = f"./checkpoints/cable_seg_model_{timestamp}.pth"
+    
     torch.save(model.state_dict(), model_path)
 
 
@@ -19,7 +22,7 @@ def load_checkpoint(path, model):
     model.load_state_dict(torch.load(path, weights_only=True))
 
 
-def merge_image(image, mask):
+def merge_image(image, mask, output_dir):
     # Resize mask if its shape doesn't match the original image dimensions
     if mask.shape != image.shape[:2]:
         mask = cv2.resize(mask, (image.shape[1], image.shape[0]))
@@ -34,7 +37,8 @@ def merge_image(image, mask):
 
     # Convert the image from BGR to RGB
     result = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
-    output_path = "predicted_mask_merged.png"
+    sufix = "_predicted_mask_merged.jpg"
+    output_path = output_dir.replace(".jpg", sufix).replace(".png", sufix)
     cv2.imwrite(output_path, result)
 
 

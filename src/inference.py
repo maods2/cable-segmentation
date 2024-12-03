@@ -7,6 +7,8 @@ import torch
 import cv2
 from albumentations.pytorch.transforms import ToTensorV2
 import numpy as np
+from pathlib import Path
+
 
 # Set the device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -71,7 +73,7 @@ def segment_image(image_path, checkpoint_path, output_path="predicted_mask.png")
     binary_mask = predict_mask(model, preprocessed_image)
     
     save_mask(binary_mask, output_path)
-    merge_image(cv2.imread(image_path), binary_mask)
+    merge_image(cv2.imread(image_path), binary_mask, output_path)
 
 # PATCH PRECTION FUNCTIONS
 def preprocess_patch(patch, preprocess_fn):
@@ -130,7 +132,7 @@ def segment_patches_image(image_path, checkpoint_path, output_path="predicted_fu
     # Save and optionally merge the result
     cv2.imwrite(output_path, full_mask)
     print(f"Full binary mask saved at: {output_path}")
-    merge_image(image, full_mask)
+    merge_image(image, full_mask, output_path)
 
 if __name__ == "__main__":
     # Execute the pipeline
