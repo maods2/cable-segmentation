@@ -48,7 +48,7 @@ def save_loss_iou_plot(epoch_loss_scores, epoch_iou_scores, num_epochs, filename
     - num_epochs (int): Number of epochs in the training.
     - filename (str): The filename to save the plot image (default is "training_loss_iou_curve.png").
     """
-    epochs = np.arange(0, num_epochs + 1)
+    epochs = np.arange(1, num_epochs + 1)
 
     # Create a figure with two subplots
     plt.figure(figsize=(12, 6))
@@ -140,17 +140,28 @@ def train_model(config):
                 images = batch["image"]
                 masks = batch["mask"]
 
-                batch_points = prepare_batch_points(masks, config["max_points"])
-                inputs = processor(images, input_points=batch_points, return_tensors="pt")
+                non_empty_mask = masks.sum(dim=(1, 2, 3)) > 0  # Soma todos os pixels ao longo das dimensões (num_classes, H, W)
+                # O resultado será um tensor booleano de tamanho (batch_size)
+
+                # Filtrando imagens e máscaras
+                filtered_images = images[non_empty_mask]  # Mantém apenas as imagens correspondentes a máscaras válidas
+                filtered_masks = masks[non_empty_mask]   
+                            
+                # batch_points = prepare_batch_points(masks, config["max_points"])
+                inputs = processor(
+                    filtered_images, 
+                    # input_points=batch_points, 
+                    return_tensors="pt"
+                    )
 
                 outputs = model(
                     pixel_values=inputs["pixel_values"].to(config["device"]),
-                    input_points=inputs["input_points"].to(config["device"]),
+                    # input_points=inputs["input_points"].to(config["device"]),
                     multimask_output=False
                 )
 
                 predicted_masks = outputs.pred_masks.squeeze(1)
-                loss = loss_function(predicted_masks, masks.to(config["device"]))
+                loss = loss_function(predicted_masks, filtered_masks.to(config["device"]))
 
                 optimizer.zero_grad()
                 loss.backward()
@@ -161,7 +172,7 @@ def train_model(config):
 
                 # Calculate IoU for the current batch
                 pred_masks_bin = (predicted_masks > 0.5).int()  # Convert logits to binary masks
-                batch_iou = compute_iou(pred_masks_bin, masks.int().to(config["device"]))
+                batch_iou = compute_iou(pred_masks_bin, filtered_masks.int().to(config["device"]))
                 epoch_ious.append(batch_iou)
                 # if i == 5:
                 #     break
@@ -183,7 +194,7 @@ def train_model(config):
         
         if min_val_loss > mean_loss:
             print("Saving model...")
-            save_model(model, "./checkpoints/cable_seg_model_sam.pth")
+            save_model(model, "./checkpoints/cable_seg_model_sam_no_inputs.pth")
             min_val_loss = mean_loss
         
         # save_loss_iou_plot(epoch_losses, epoch_ious, i)
