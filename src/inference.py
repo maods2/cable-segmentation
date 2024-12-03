@@ -155,9 +155,9 @@ if __name__ == "__main__":
             checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241111_035359_200ep_resize.pth",
             output_path=img.replace(".jpg","_patch_segmented.jpg")                                                                
         )
-        segment_image(
-            image_path=img, 
-            checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241111_035359_200ep_resize.pth",
-            output_path=img.replace(".jpg","_segmented.jpg")                                                                
-        )
+        # segment_image(
+        #     image_path=img, 
+        #     checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241111_035359_200ep_resize.pth",
+        #     output_path=img.replace(".jpg","_segmented.jpg")                                                                
+        # )
     
