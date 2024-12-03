@@ -128,6 +128,8 @@ def train_model(config):
     epoch_iou_scores = []  # To track IoU for each epoch
     epoch_loss_scores = []  # To track loss for each epoch
 
+    min_val_loss = sys.maxsize
+    
     for epoch in range(num_epochs):
         epoch_losses = []
         epoch_ious = []  # To track IoU for this epoch
@@ -161,8 +163,8 @@ def train_model(config):
                 pred_masks_bin = (predicted_masks > 0.5).int()  # Convert logits to binary masks
                 batch_iou = compute_iou(pred_masks_bin, masks.int().to(config["device"]))
                 epoch_ious.append(batch_iou)
-                if i == 100:
-                    break
+                # if i == 5:
+                #     break
 
                 # Update tqdm progress bar with current loss and IoU
                 pbar.set_postfix(loss=mean(epoch_losses), iou=mean(epoch_ious))
@@ -177,11 +179,15 @@ def train_model(config):
         print(f'EPOCH {epoch + 1}:')
         print(f'Mean Loss: {mean_loss}')
         print(f'Mean IoU: {mean_iou:.4f}')
+
         
-        save_model(model, "./checkpoints/cable_seg_model_sam.pth")
+        if min_val_loss > mean_loss:
+            print("Saving model...")
+            save_model(model, "./checkpoints/cable_seg_model_sam.pth")
+            min_val_loss = mean_loss
         
-        # save_loss_iou_plot(epoch_losses, epoch_ious, 100)
-        save_loss_iou_plot(epoch_loss_scores, epoch_iou_scores, num_epochs)
+        # save_loss_iou_plot(epoch_losses, epoch_ious, i)
+    save_loss_iou_plot(epoch_loss_scores, epoch_iou_scores, num_epochs)
         
         
 
