@@ -20,3 +20,7 @@ RUN apt-get update && apt-get install -y git ninja-build libsm6 libxrender-dev l
 RUN conda clean --all
 COPY requirements.txt . 
 RUN pip install -r requirements.txt
+
+WORKDIR /workspaces/cable-segmentation
+
+RUN git config --global --add safe.directory /workspaces/cable-segmentation
