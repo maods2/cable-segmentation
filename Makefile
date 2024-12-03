@@ -10,3 +10,6 @@ download-dataset:
 train:
 	@echo "Running Python script with configuration file $(CONFIG_FILE)"
 	python3 src/main.py --train --config "./configs/$(CONFIG_FILE)"
+
+inference:
+	python3 src/inference.py 
