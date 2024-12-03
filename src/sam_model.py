@@ -180,8 +180,8 @@ def train_model(config):
         
         save_model(model, "./checkpoints/cable_seg_model_sam.pth")
         
-        save_loss_iou_plot(epoch_losses, epoch_ious, 100)
-        # save_loss_iou_plot(epoch_loss_scores, epoch_iou_scores, num_epochs)
+        # save_loss_iou_plot(epoch_losses, epoch_ious, 100)
+        save_loss_iou_plot(epoch_loss_scores, epoch_iou_scores, num_epochs)
         
         
 
