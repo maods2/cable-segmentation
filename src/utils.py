@@ -7,10 +7,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def save_model(model):
-    Path(f"./checkpoints/").mkdir(exist_ok=True)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    model_path = f"./checkpoints/cable_seg_model_{timestamp}.pth"
+def save_model(model, model_path=None):
+    
+    if not model_path:
+        Path(f"./checkpoints/").mkdir(exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        model_path = f"./checkpoints/cable_seg_model_{timestamp}.pth"
+    
     torch.save(model.state_dict(), model_path)
 
 
