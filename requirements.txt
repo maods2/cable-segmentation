@@ -10,4 +10,5 @@ segmentation-models-pytorch
 mmengine
 patchify
 pytorch-lightning
-
+transformers==4.44.0
+monai
