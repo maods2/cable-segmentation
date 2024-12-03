@@ -136,10 +136,10 @@ if __name__ == "__main__":
     # Execute the pipeline
     segment_image(
         image_path="/workspaces/cable-segmentation/data_original_size/1_00186.jpg",
-        checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241111_015750.pth"
+        checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241111_035359.pth"
     )
     
     segment_patches_image(
     image_path="/workspaces/cable-segmentation/data_original_size/1_00186.jpg",
-    checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241111_015750.pth"
+    checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241111_035359.pth"
     )
