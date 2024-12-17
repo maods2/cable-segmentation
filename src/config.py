@@ -20,7 +20,7 @@ class Config:
     encoder_type: str
     transforms_type: str
     use_patches: bool
-    model_name: str
+    architecture: str
     in_channels: int
     out_classes: int
     data_path: str
