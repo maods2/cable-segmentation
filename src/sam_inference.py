@@ -218,29 +218,43 @@ def load_image_transform():
 # ===============================
 if __name__ == "__main__":
     # Load SAM model and processor
-    checkpoint_path = "./checkpoints/cable_seg_model_sam.pth"
+    checkpoint_path = "./checkpoints/cable_seg_model_sam_no_inputs.pth"
     
 
     # Define the transformation
     transform = load_image_transform()
 
     img_path = "./assets/tree"
+    out_path = "./assets/output"
+    out_path = str(Path(out_path).resolve())
+    checkpoint_path = "./checkpoints/cable_seg_model_sam_no_inputs.pth"
+    
+
+    # Define the transformation
+    # transform = load_image_transform()
+
+    # img_path = "./assets/tree"
+    # out_path = str(Path(out_path).resolve())
+
+    # sam_segment_patches(img_path, checkpoint_path, output_path="predicted_full_mask_sam.png")
+
+
     imgs = [file.as_posix() for file in Path(img_path).glob('*.jpg') if 'segmented' not in Path(file).name]
 
     for img in imgs:
 
         # # Segment the full image
-        # sam_segment_image(
-        #     img, 
-        #     checkpoint_path, 
-        #     img.replace(".jpg","_segmented.jpg")     
-        #     )
-
-        # Segment an image by processing it in patches
-        sam_segment_patches(
+        sam_segment_image(
             img, 
             checkpoint_path, 
-            img.replace(".jpg","_patch_segmented.jpg"),   
-            patch_size=1024, 
-            stride=512
+            img.replace(".jpg","_segmented.jpg").replace("tree","sam_output")     
             )
+
+        # Segment an image by processing it in patches
+        # sam_segment_patches(
+        #     img, 
+        #     checkpoint_path, 
+        #     img.replace(".jpg","_patch_segmented.jpg"),   
+        #     patch_size=1024, 
+        #     stride=512
+        #     )
