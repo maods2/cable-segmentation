@@ -25,6 +25,9 @@ class Config:
     out_classes: int
     data_path: str
     pipeline_name: str
+    load_checkpoint: bool 
+    load_model_path: str 
+
 
 
 def split_datasets(config: Config, dataset):
