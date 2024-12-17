@@ -14,13 +14,40 @@ import albumentations as A
 import numpy as np
 from collections import defaultdict
 
-from utils import plot_loss_curve
+from utils import plot_loss_curve, save_loss_iou_plot
 
+def model_builder(
+    architecture: str = "Unet",
+    encoder_name: str = "resnet34", 
+    in_channels: int = 3,
+    out_classes: int = 1
+    ):
+    if architecture == 'Unet':
+        model = smp.Unet(
+            encoder_name=encoder_name, 
+            encoder_weights='imagenet', 
+            in_channels=in_channels, 
+            classes=out_classes)
+    elif architecture == 'FPN':
+        model = smp.FPN(
+            encoder_name=encoder_name, 
+            encoder_weights='imagenet', 
+            in_channels=in_channels, 
+            classes=out_classes)
+    elif architecture == 'DeepLabV3':
+        model = smp.DeepLabV3Plus(
+            encoder_name=encoder_name, 
+            encoder_weights='imagenet', 
+            in_channels=in_channels, 
+            classes=out_classes)
+    else:
+        raise ValueError('architecture not supported')
+    return model
 
 class WireModel(pl.LightningModule):
     def __init__(
         self,
-        arch,
+        architecture,
         encoder_name,
         in_channels,
         out_classes,
@@ -31,20 +58,21 @@ class WireModel(pl.LightningModule):
         super().__init__()
         self.t_max = tmax
         self.pipeline_name = pipeline_name
-        # self.model = smp.create_model(
-        #     arch,
-        #     encoder_name=encoder_name,
-        #     in_channels=in_channels,
-        #     classes=out_classes,
-        #     **kwargs,
+        
+        
+        # self.model = smp.Unet(
+        #     encoder_name="resnet34",  # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
+        #     encoder_weights="imagenet",  # use `imagenet` pre-trained weights for encoder initialization
+        #     in_channels=in_channels,  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
+        #     classes=out_classes,  # model output channels (number of classes in your dataset)
         # )
-        self.model = smp.Unet(
-            encoder_name="resnet34",  # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            encoder_weights="imagenet",  # use `imagenet` pre-trained weights for encoder initialization
-            in_channels=in_channels,  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
-            classes=out_classes,  # model output channels (number of classes in your dataset)
-        )
 
+        self.model = model_builder(
+            architecture=architecture,
+            encoder_name=encoder_name,
+            in_channels=in_channels,
+            out_classes=out_classes
+        )
         # preprocessing parameteres for image
         params = smp.encoders.get_preprocessing_params(encoder_name)
         self.register_buffer("std", torch.tensor(params["std"]).view(1, 3, 1, 1))
@@ -65,7 +93,13 @@ class WireModel(pl.LightningModule):
         # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         # model_path = f"./checkpoints/model_metrics_{timestamp}.npz"
         # np.savez(model_path, **self.metrics)
-        plot_loss_curve(self.metrics, f"{self.pipeline_name}_loss_curve.png")
+        loss_train = self.metrics['loss_train']
+        iou_train = self.metrics['iou_train']
+        
+        loss_valid = self.metrics['loss_valid']
+        iou_valid = self.metrics['iou_valid']
+        # plot_loss_curve(self.metrics, f"{self.pipeline_name}_loss_curve.png")
+        save_loss_iou_plot(loss_train, iou_train, len(loss_train),f"{self.pipeline_name}_loss_iou_curve.png")
 
     def forward(self, image):
         # normalize image here
@@ -130,7 +164,7 @@ class WireModel(pl.LightningModule):
     def shared_epoch_end(self, outputs, stage):
         losses = [x["_loss"] for x in outputs]
         loss = sum(losses) / len(losses)
-        self.metrics[stage].append(loss)
+        self.metrics[f'loss_{stage}'].append(loss)
 
         # aggregate step metics
         tp = torch.cat([x["tp"] for x in outputs])
@@ -154,6 +188,9 @@ class WireModel(pl.LightningModule):
             f"{stage}_per_image_iou": per_image_iou,
             f"{stage}_dataset_iou": dataset_iou,
         }
+        
+        self.metrics[f'iou_{stage}'].append(dataset_iou)
+        
 
         self.log_dict(metrics, prog_bar=True)
 
@@ -206,7 +243,7 @@ class WireModel(pl.LightningModule):
                 "frequency": 1,
             },
         }
-        return
+
 
 
 if __name__ == "__main__":
