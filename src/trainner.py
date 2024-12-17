@@ -189,7 +189,7 @@ class WireModel(pl.LightningModule):
             f"{stage}_dataset_iou": dataset_iou,
         }
         
-        self.metrics[f'iou_{stage}'].append(dataset_iou)
+        self.metrics[f'iou_{stage}'].append(dataset_iou.cpu().detach().numpy())
         
 
         self.log_dict(metrics, prog_bar=True)
