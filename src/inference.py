@@ -39,7 +39,7 @@ def preprocess_image(image_path, preprocess_fn):
     """Load and preprocess an image for the model."""
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    
+
     pad_transform = A.Compose(
         [
             A.PadIfNeeded(min_height=2176, min_width=3840),
@@ -68,10 +68,10 @@ def segment_image(image_path, checkpoint_path, output_path="predicted_mask.png")
     preprocess_fn = load_preprocessing_fn()
     model = initialize_model()
     model = load_model_checkpoint(checkpoint_path, model)
-    
+
     preprocessed_image = preprocess_image(image_path, preprocess_fn)
     binary_mask = predict_mask(model, preprocessed_image)
-    
+
     save_mask(binary_mask, output_path)
     merge_image(cv2.imread(image_path), binary_mask, output_path)
 
@@ -107,41 +107,60 @@ def reconstruct_full_mask(patches_masks, image_shape, patch_size=512, stride=256
         full_mask[y:y+patch_size, x:x+patch_size] = np.maximum(full_mask[y:y+patch_size, x:x+patch_size], mask)
     return full_mask
 
-def segment_patches_image(image_path, checkpoint_path, output_path="predicted_full_mask.png"):
+def segment_patches_image(image_path, checkpoint_path, output_path="predicted_full_mask.png", save_masks=False):
+    # Load and initialize model
     preprocess_fn = load_preprocessing_fn()
     model = initialize_model()
     model = load_model_checkpoint(checkpoint_path, model)
-    
+
     # Load and preprocess the image
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    
+
     # Split image into patches
     patches = split_image_into_patches(image)
-    
+
     # Predict mask for each patch
     patches_masks = []
     for patch, x, y in patches:
         preprocessed_patch = preprocess_patch(patch, preprocess_fn)
         patch_mask = predict_patch_mask(model, preprocessed_patch)
         patches_masks.append((patch_mask, x, y))
-    
+
     # Reconstruct the full mask from patch masks
     full_mask = reconstruct_full_mask(patches_masks, image.shape)
+
+    if save_masks:
+        # Save and optionally merge the result
+        cv2.imwrite(output_path, full_mask)
+        print(f"Full binary mask saved at: {output_path}")
+        merge_image(image, full_mask, output_path)
     
-    # Save and optionally merge the result
-    cv2.imwrite(output_path, full_mask)
-    print(f"Full binary mask saved at: {output_path}")
-    merge_image(image, full_mask, output_path)
+    return full_mask
 
 if __name__ == "__main__":
     # Execute the pipeline
-    segment_image(
-        image_path="/workspaces/cable-segmentation/data_original_size/1_00186.jpg",
-        checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241111_035359.pth"
-    )
-    
-    segment_patches_image(
-    image_path="/workspaces/cable-segmentation/data_original_size/1_00186.jpg",
-    checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241111_035359.pth"
-    )
+    # segment_image(
+    #     image_path="/workspaces/cable-segmentation/data_original_size/1_00186.jpg",
+    #     checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241111_015750.pth"
+    # )
+
+    # segment_patches_image(
+    # image_path="/workspaces/cable-segmentation/data_original_size/1_00186.jpg",
+    # checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241111_015750.pth"
+    # )
+    img_path = "./assets/tree"
+
+    imgs = [file.as_posix() for file in Path(img_path).glob('*.jpg') if 'segmented' not in Path(file).name]
+    for img in imgs:
+        segment_patches_image(
+            image_path=img, 
+            checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241204_091948_resize_400ep.pth",
+            output_path=img.replace(".jpg","_patch_segmented.jpg").replace("tree", "output"),
+            save_masks=True                                                                    
+        )
+        # segment_image(
+        #     image_path=img, 
+        #     checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241111_035359_200ep_resize.pth",
+        #     output_path=img.replace(".jpg","_segmented.jpg")                                                                
+        # )
