@@ -12,3 +12,5 @@ in_channels: 3
 out_classes: 1
 data_path: './data_original_size'
 pipeline_name: 'default'
+load_checkpoint: false
+load_model_path: ''
