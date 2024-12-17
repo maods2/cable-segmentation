@@ -107,11 +107,8 @@ def reconstruct_full_mask(patches_masks, image_shape, patch_size=512, stride=256
         full_mask[y:y+patch_size, x:x+patch_size] = np.maximum(full_mask[y:y+patch_size, x:x+patch_size], mask)
     return full_mask
 
-def segment_patches_image(image_path, checkpoint_path, output_path="predicted_full_mask.png", save_masks=False):
-    # Load and initialize model
-    preprocess_fn = load_preprocessing_fn()
-    model = initialize_model()
-    model = load_model_checkpoint(checkpoint_path, model)
+def segment_patches_image(image_path, preprocess_fn, model, output_path="predicted_full_mask.png", save_masks=False):
+
 
     # Load and preprocess the image
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)
@@ -149,14 +146,20 @@ if __name__ == "__main__":
     # image_path="/workspaces/cable-segmentation/data_original_size/1_00186.jpg",
     # checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241111_015750.pth"
     # )
-    img_path = "./assets/tree"
+    img_path = "./assets/input"
+    checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241204_091948_resize_400ep.pth"
+    
+    # Load and initialize model
+    preprocess_fn = load_preprocessing_fn()
+    model = load_model_checkpoint(checkpoint_path, initialize_model())
 
     imgs = [file.as_posix() for file in Path(img_path).glob('*.jpg') if 'segmented' not in Path(file).name]
     for img in imgs:
         segment_patches_image(
             image_path=img, 
-            checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241204_091948_resize_400ep.pth",
-            output_path=img.replace(".jpg","_patch_segmented.jpg").replace("tree", "output"),
+            preprocess_fn=preprocess_fn,
+            model=model,
+            output_path=img.replace(".jpg","_patch_segmented.jpg").replace("input", "deeplabv3"),
             save_masks=True                                                                    
         )
         # segment_image(
