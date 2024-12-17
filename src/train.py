@@ -6,7 +6,7 @@ from utils import save_model
 
 def train_model(config: Config, train_loader, val_loader, test_loader):
     model = WireModel(
-        config.model_name,
+        config.architecture,
         config.encoder_type,
         in_channels=config.in_channels,
         out_classes=config.out_classes,
