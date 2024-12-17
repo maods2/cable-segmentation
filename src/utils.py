@@ -7,14 +7,38 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def save_model(model, model_path=None):
+def save_model(model, model_name="cable_seg_model", checkpoint_dir="./checkpoints", suffix=None):
+    """
+    Save the PyTorch model to the specified directory with a dynamic filename.
     
-    if not model_path:
-        Path(f"./checkpoints/").mkdir(exist_ok=True)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        model_path = f"./checkpoints/cable_seg_model_{timestamp}.pth"
+    Args:
+        model (torch.nn.Module): The PyTorch model to save.
+        model_name (str): Base name for the model file (default: "cable_seg_model").
+        checkpoint_dir (str): Directory to save model checkpoints (default: "./checkpoints").
+        suffix (str, optional): Additional suffix in the filename, such as metrics or comments.
+        
+    Returns:
+        str: The full path where the model was saved.
+    """
+    # Create the checkpoint directory if it does not exist
+    Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
     
+    # Generate a timestamp to ensure unique filenames
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    # Build the filename dynamically with optional suffix
+    filename = f"{model_name}_{timestamp}"
+    if suffix:
+        filename += f"_{suffix}"
+    filename += ".pth"
+    
+    # Construct the full path to the file
+    model_path = os.path.join(checkpoint_dir, filename)
+    
+    # Save the model's state dictionary to the file
     torch.save(model.state_dict(), model_path)
+    print(f"Model saved at: {model_path}")
+    return model_path
 
 
 def load_checkpoint(path, model):
