@@ -74,3 +74,40 @@ def plot_loss_curve(data, filename):
     # Saving the plot to the file
     plt.savefig(filename)
     plt.close()
+
+def save_loss_iou_plot(epoch_loss_scores, epoch_iou_scores, num_epochs, filename="training_loss_iou_curve.png"):
+    """
+    Function to plot and save the loss and IoU curves.
+
+    Args:
+    - epoch_loss_scores (list): List of loss values for each epoch.
+    - epoch_iou_scores (list): List of IoU values for each epoch.
+    - num_epochs (int): Number of epochs in the training.
+    - filename (str): The filename to save the plot image (default is "training_loss_iou_curve.png").
+    """
+    epochs = np.arange(1, num_epochs + 1)
+
+    # Create a figure with two subplots
+    plt.figure(figsize=(12, 6))
+
+    # Plotting Loss
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs, epoch_loss_scores, label='Loss', color='blue', marker='o')
+    plt.title('Loss Curve')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.grid(True)
+    plt.legend()
+
+    # Plotting IoU
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs, epoch_iou_scores, label='IoU', color='green', marker='o')
+    plt.title('IoU Curve')
+    plt.xlabel('Epoch')
+    plt.ylabel('IoU')
+    plt.grid(True)
+    plt.legend()
+
+    # Save the plot to a file
+    plt.tight_layout()
+    plt.savefig(filename)
