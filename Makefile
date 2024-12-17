@@ -6,6 +6,11 @@ download-dataset:
 	unzip data_original_size.zip
 	rm -rf data_original_size.zip
 
+download-dataset-cleaned:
+	gdown https://drive.google.com/uc?id=1WNx0-Yv7vLkhoYI4NqO2hXjIo5NwSPgW 
+	unzip data_wire_clean.zip
+	rm -rf data_wire_clean.zip
+
 # Main target: runs training
 train:
 	@echo "Running Python script with configuration file $(CONFIG_FILE)"
@@ -16,3 +21,7 @@ train-sam:
 
 inference:
 	python3 src/inference.py 
+
+
+	https://drive.google.com/file/d/1WNx0-Yv7vLkhoYI4NqO2hXjIo5NwSPgW/view?usp=sharing
+	
