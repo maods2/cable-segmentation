@@ -7,7 +7,7 @@ epoch: 1
 encoder_type: "resnet34"
 transforms_type: "full-image-resize"
 use_patches: false
-model_name: "Unet"
+architecture: "Unet"
 in_channels: 3
 out_classes: 1
 data_path: './data_original_size'

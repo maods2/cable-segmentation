@@ -7,7 +7,7 @@ epoch: 2
 encoder_type: "resnet34"
 transforms_type: "patches"
 use_patches: true
-model_name: "Unet"
+architecture: "Unet"
 in_channels: 3
 out_classes: 1
 data_path: './data_original_size'
