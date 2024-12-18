@@ -2,6 +2,7 @@ from segmentation_models_pytorch.encoders import get_preprocessing_fn
 import segmentation_models_pytorch as smp
 from PIL import Image
 import albumentations as A
+from trainner import model_builder
 from utils import load_checkpoint, merge_image
 import torch
 import cv2
@@ -15,18 +16,20 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 print("device: ", device)
 
 # COMMON FUNCTIONS
-def load_preprocessing_fn(encoder_name="resnet18", pretrained="imagenet"):
+def load_preprocessing_fn(encoder_name="resnet34", pretrained="imagenet"):
     """Load preprocessing function for the specified encoder."""
     return get_preprocessing_fn(encoder_name, pretrained=pretrained)
 
-def initialize_model(encoder_name="resnet34", encoder_weights="imagenet", in_channels=3, classes=1):
+def initialize_model(architecture="Unet", encoder_name="resnet34", encoder_weights="imagenet", in_channels=3, classes=1):
     """Initialize the segmentation model."""
-    model = smp.Unet(
+    
+    model = model_builder(
+        architecture=architecture,
         encoder_name=encoder_name,
-        encoder_weights=encoder_weights,
         in_channels=in_channels,
-        classes=classes,
-    )
+        out_classes=classes
+        )
+    
     return model.to(device)
 
 def load_model_checkpoint(checkpoint_path, model):
@@ -147,11 +150,11 @@ if __name__ == "__main__":
     # checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241111_015750.pth"
     # )
     img_path = "./assets/input"
-    checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_model_20241204_091948_resize_400ep.pth"
+    checkpoint_path="/workspaces/cable-segmentation/checkpoints/cable_seg_Unet_20241217_192339_epoch100_ttpla.pth"
     
     # Load and initialize model
     preprocess_fn = load_preprocessing_fn()
-    model = load_model_checkpoint(checkpoint_path, initialize_model())
+    model = load_model_checkpoint(checkpoint_path, initialize_model(architecture="Unet"))
 
     imgs = [file.as_posix() for file in Path(img_path).glob('*.jpg') if 'segmented' not in Path(file).name]
     for img in imgs:
@@ -159,7 +162,7 @@ if __name__ == "__main__":
             image_path=img, 
             preprocess_fn=preprocess_fn,
             model=model,
-            output_path=img.replace(".jpg","_patch_segmented.jpg").replace("input", "deeplabv3"),
+            output_path=img.replace(".jpg","_patch_segmented.jpg").replace("input", "unet_tlpa"),
             save_masks=True                                                                    
         )
         # segment_image(
